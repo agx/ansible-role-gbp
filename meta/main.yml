@@ -1,0 +1,20 @@
+---
+dependencies: []
+
+galaxy_info:
+  author: Guido Günther <agx@sigxcpu.org>
+  description: gbp - git-buildpackge + cowbuilder
+  license: "license (GPLv3+)"
+  min_ansible_version: 2.0
+  platforms:
+    - name: Debian
+      versions:
+      - all
+    - name: Ubuntu
+      versions:
+      - all
+  galaxy_tags:
+    - development
+    - git
+    - command
+

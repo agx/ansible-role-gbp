@@ -1,0 +1,3 @@
+_gbp_pkgs:
+  - cowbuilder
+  - git-buildpackage

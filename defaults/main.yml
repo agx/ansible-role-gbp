@@ -1,0 +1,2 @@
+gbp_cowbuilder_targets:
+ - dist: sid

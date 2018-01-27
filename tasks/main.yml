@@ -1,0 +1,65 @@
+- name: "Ensure needed packages are installed"
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    "{{ _gbp_pkgs }}"
+
+- name: "Ensure pbuilder configuration"
+  template:
+    src: pbuilderrc.j2
+    dest: /etc/pbuilderrc
+
+- name: Ensure dist chroots
+  shell: "DIST={{item.dist}} git-pbuilder create"
+  args:
+    creates: "/var/cache/pbuilder/base-{{item.dist}}.cow"
+  with_items:
+    "{{ gbp_cowbuilder_targets }}"
+  when:
+    item.arch is not defined
+
+- name: Ensure dist-arch chroots
+  shell: "DIST={{item.dist}} ARCH={{item.arch}} git-pbuilder create"
+  args:
+    creates: "/var/cache/pbuilder/base-{{item.dist}}-{{item.arch}}.cow"
+  with_items:
+    "{{ gbp_cowbuilder_targets }}"
+  when:
+    item.arch is defined
+
+- name: Ensure pbuilder sudoers
+  copy:
+    content: |
+      %pbuilder ALL = (root) SETENV: NOPASSWD: /usr/sbin/cowbuilder, /usr/sbin/pbuilder
+    dest: /etc/sudoers.d/pbuilder
+
+- name: Ensure pbuilder group
+  group:
+    name: pbuilder
+
+- name: Ensure pbuilder users are in pbuilder group
+  user:
+    name: "{{ item }}"
+    group: pbuilder
+    append: yes
+  with_items:
+    "{{ pbuilder_users }}"
+  when: pbuilder_users is defined
+
+- name: Ensure pbuilder hook dir
+  file:
+    path: "{{ pbuilder_hook_dir }}"
+    state: directory
+  when: pbuilder_hook_dir is defined
+
+- name: Ensure pbuilder example hooks
+  file:
+    dest: "{{ pbuilder_hook_dir }}/{{ item }}"
+    src: "/usr/share/doc/pbuilder/examples/{{ item }}"
+    state: link
+  with_items:
+    "{{ pbuilder_example_hooks }}"
+  when:
+    - pbuilder_example_hooks is defined
+    - pbuilder_hook_dir is defined

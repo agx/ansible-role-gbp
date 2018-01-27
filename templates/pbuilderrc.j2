@@ -1,0 +1,18 @@
+# this is your configuration file for pbuilder.
+# the file in /usr/share/pbuilder/pbuilderrc is the default template.
+# /etc/pbuilderrc is the one meant for overwriting defaults in
+# the default template
+#
+# read pbuilderrc.5 document for notes on specific options.
+
+{% for target in gbp_cowbuilder_targets -%}
+{%   if target.foreign|default(False) and target.arch is defined -%}
+# Treating {{ target.arch }} foreign
+if expr "$*" : ".*--architecture\s\+{{ target.arch }}" >/dev/null && [ "$(dpkg --print-architecture)" != "{{ target.arch }}" ]; then
+  PBUILDERSATISFYDEPENDSCMD=/usr/lib/pbuilder/pbuilder-satisfydepends-apt
+  DEBOOTSTRAP="qemu-debootstrap"
+fi
+{%   endif -%}
+{% endfor -%}
+
+[ ! -f /etc/pbuilder/pbuilderrc.local ] || . /etc/pbuilder/pbuilderrc.local
