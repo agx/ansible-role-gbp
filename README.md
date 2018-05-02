@@ -33,7 +33,7 @@ None known.
 Example Playbook
 ----------------
 The build host is assumed to run amd64 and we create chroots for amd64, i386
-and armhf:
+and armhf. We also add a custom ci chroot where we pass in all parameters:
 
     - hosts: servers
       roles:
@@ -45,6 +45,10 @@ and armhf:
              - dist: buster
                arch: armhf
                foreign: true
+             - dist: buster
+               autoconf: False
+               basepath: /var/cache/pbuilder/buster+ci.cow
+               pbuilder_options: "--dist=buster --keyring=/path/to/your/ci/keyring.gpg --othermirror='deb http://your.ci.repo/ ci latest'"
 
 License
 -------

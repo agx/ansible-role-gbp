@@ -17,7 +17,8 @@
   with_items:
     "{{ gbp_cowbuilder_targets }}"
   when:
-    item.arch is not defined
+    - item.arch is not defined
+    - item.autoconf|default(True)
 
 - name: Ensure dist-arch chroots
   shell: "DIST={{item.dist}} ARCH={{item.arch}} git-pbuilder create"
@@ -26,7 +27,19 @@
   with_items:
     "{{ gbp_cowbuilder_targets }}"
   when:
-    item.arch is defined
+    - item.arch is defined
+    - item.autoconf|default(True)
+
+- name: Ensure custom chroots
+  shell: "GIT_PBUILDER_OPTIONS=\"{{ item.pbuilder_options|default() }} --basepath={{ item.basepath }}\" GIT_PBUILDER_AUTOCONF=no git-pbuilder create"
+  args:
+    creates: "{{ item.basepath }}"
+  with_items:
+    "{{ gbp_cowbuilder_targets }}"
+  when:
+    - item.autoconf|default(True) == False
+    # Needed so we can use creates: above
+    - item.basepath is defined
 
 - name: Ensure pbuilder sudoers
   copy:
